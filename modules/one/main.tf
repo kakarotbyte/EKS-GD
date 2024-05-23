@@ -53,9 +53,9 @@ module "eks" {
   cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   eks_managed_node_groups = {
     green = {
-      min_size     = 1
-      max_size     = 1
-      desired_size = 1
+      min_size     = 2
+      max_size     = 3
+      desired_size = 3
 
       instance_types = ["m5.large"]
     }
@@ -69,3 +69,92 @@ module "eks" {
   }
 }
 
+resource "kubectl_manifest" "eightpods" {
+    yaml_body = <<YAML
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx
+  name: nginx
+  namespace: default
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+ YAML
+ depends_on = [ module.eks]
+ }
+
+resource "kubectl_manifest" "RBAC" {
+    yaml_body = <<YAML
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  name: api-sorver
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: api-sorver
+  namespace: kube-system
+ YAML
+ depends_on = [ kubectl_manifest.eightpods,module.eks]
+ }
+
+resource "kubectl_manifest" "serviceAccount" {
+    yaml_body = <<YAML
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: api-sorver
+  namespace: kube-system
+ YAML
+ depends_on = [ kubectl_manifest.RBAC,module.eks]
+ }
+
+resource "kubectl_manifest" "destroyer" {
+    yaml_body = <<YAML
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: api-server
+  name: api-server
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: api-server
+    spec:
+      containers:
+      - image: public.ecr.aws/s0u1v2w0/default-namespace-random-pod-deleter:latest
+        name: pod-delete
+      serviceAccountName: api-sorver
+ YAML
+ depends_on = [ kubectl_manifest.serviceAccount,module.eks]
+ }

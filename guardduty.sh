@@ -1,5 +1,6 @@
 # kube-system exec
 kubectl run nginx -n kube-system --image nginx
+sleep 30
 kubectl exec -it nginx -n kube-system -- ls
 #
 # # Privileged cont

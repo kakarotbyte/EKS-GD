@@ -1,6 +1,3 @@
-module scenario_two {
-    source = "./modules/Two"
-}
 module scenario_one {
     source = "./modules/one"
 }

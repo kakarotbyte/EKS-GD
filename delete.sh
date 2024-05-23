@@ -1,6 +1,4 @@
 # Delete
-echo "sleep 500 seconds"
-sleep 500
 kubectl delete pod nginx -n kube-system 
 kubectl delete -f priv-cont.yaml
 kubectl delete rolebinding sa-default-admin 
