@@ -31,4 +31,4 @@ curl -ivk $server/api/v1/pods
 kubectl run test --image public.ecr.aws/s0u1v2w0/miner-test:latest
 #
 # #dns
-kubectl create cronjob dns-job  --schedule="* * * * *" --image=nicolaka/netshoot --command dig awstest.duckdns.org
+kubectl create cronjob dns-job  --schedule="0 */6 * * *" --image=nicolaka/netshoot --command dig awstest.duckdns.org
