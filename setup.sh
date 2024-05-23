@@ -32,10 +32,10 @@ terraform init
 terraform apply -auto-approve
 
 
-aws eks wait cluster-active --name two  --region us-east-1
-aws eks wait cluster-active --name one --region us-east-1
+#aws eks wait cluster-active --name two  --region us-east-1
+aws eks wait cluster-active --name gdone --region us-east-1
 
-aws eks update-kubeconfig --name two  --region us-east-1
-aws eks update-kubeconfig --name one  --region us-east-1
+#aws eks update-kubeconfig --name two  --region us-east-1
+aws eks update-kubeconfig --name gdone  --region us-east-1
 
 source /home/ec2-user/.bashrc
